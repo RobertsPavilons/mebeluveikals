@@ -1,0 +1,86 @@
+```c#
+public void ExportFurnitureToCsv(string filePath)
+{
+    try
+    {
+        var furnitureList = ReadFurniture();
+
+        using (var writer = new StreamWriter(filePath, false, Encoding.UTF8))
+        {
+            writer.WriteLine("Name,Description,Price,Height,Width,Length");
+            foreach (var furniture in furnitureList)
+            {
+                string line = string.Join(",",
+                    EscapeField(furniture.Name),
+                    EscapeField(furniture.Description),
+                    furniture.Price.ToString(CultureInfo.InvariantCulture),
+                    furniture.Height,
+                    furniture.Width,
+                    furniture.Length);
+                writer.WriteLine(line);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Radās kļūda eksportējot mēbeles uz CSV failu: " + ex.Message);
+    }
+}
+
+private string EscapeField(string field)
+{
+    if (string.IsNullOrEmpty(field)) return "";
+    if (field.Contains(',') || field.Contains('"'))
+        return $""{field.Replace(""", """")}"";
+    return field;
+                                 }
+public void ImportFurnitureFromCsv(string filePath)
+{
+    try
+    {
+        using (var reader = new StreamReader(filePath))
+        {
+            string line;
+            int lineNumber = 0;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                lineNumber++;
+                if (lineNumber == 1) continue;
+
+                var columns = line.Split(',');
+                if (columns.Length != 6)
+                {
+                    throw new Exception($"Kļūda CSV rindā {lineNumber}: Nepareizs kolonnu skaits.");
+                }
+
+                try 
+                {
+                    string name = columns[0].Trim();
+                    string description = columns[1].Trim();
+                    double price = double.Parse(columns[2], CultureInfo.InvariantCulture);
+                    int height = int.Parse(columns[3]);
+                    int width = int.Parse(columns[4]);
+                    int length = int.Parse(columns[5]);
+
+                    try
+                    {
+                        var existingFurniture = ReadFurnitureByName(name);
+                        DeleteFurnitureByName(name);
+                    }
+                    catch { /* If it doesn't exist, that's fine! */ }
+
+                    AddFurniture(name, description, price, height, width, length);
+                }
+                catch (FormatException)
+                {
+                    throw new Exception($"Kļūda CSV rindā {lineNumber}: Nepareizs datu formāts.");
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Radās kļūda importējot mēbeles no CSV faila: " + ex.Message);
+    }
+            }```
