@@ -68,7 +68,7 @@ public void ImportFurnitureFromCsv(string filePath)
                         var existingFurniture = ReadFurnitureByName(name);
                         DeleteFurnitureByName(name);
                     }
-                    catch { /* If it doesn't exist, that's fine! */ }
+                    catch {
 
                     AddFurniture(name, description, price, height, width, length);
                 }
